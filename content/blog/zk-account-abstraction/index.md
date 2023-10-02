@@ -1,5 +1,5 @@
 ---
-title: ZK + Account Abstraction - Experimenting with 4337 and Semaphore
+title: ZK + Account Abstraction - Experimenting with EIP 4337 and Semaphore
 date: "2023-10-02"
 description: "Experiment on building EIP-4337 smart contract wallet controllable by any member in a Semaphore group."
 ---

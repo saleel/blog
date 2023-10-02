@@ -9,7 +9,7 @@
  */
 module.exports = {
   siteMetadata: {
-    title: `Saleel's Blog`,
+    title: `saleel`,
     author: {
       name: `Saleel P`
     },
@@ -51,6 +51,13 @@ module.exports = {
             options: {
               wrapperStyle: `margin-bottom: 1.0725rem`,
             },
+          },
+          {
+            resolve: "gatsby-remark-external-links",
+            options: {
+              target: "_blank",
+              rel: "nofollow"
+            }
           },
           `gatsby-remark-prismjs`,
         ],
