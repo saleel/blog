@@ -20,7 +20,9 @@ module.exports = {
       twitter: `_saleel`,
     },
   },
+  pathPrefix: '__GATSBY_IPFS_PATH_PREFIX__',
   plugins: [
+    'gatsby-plugin-ipfs',
     `gatsby-plugin-image`,
     {
       resolve: `gatsby-source-filesystem`,

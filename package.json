@@ -24,6 +24,7 @@
     "react-dom": "^18.1.0"
   },
   "devDependencies": {
+    "gatsby-plugin-ipfs": "^2.0.2",
     "prettier": "^2.8.8"
   },
   "license": "Private",
@@ -32,7 +33,7 @@
     "url": "git+https://github.com/aleel/blog.git"
   },
   "scripts": {
-    "build": "gatsby build",
+    "build": "gatsby build --prefix-paths",
     "develop": "gatsby develop",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "start": "gatsby develop",

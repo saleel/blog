@@ -13,7 +13,7 @@ const Layout = ({ location, title, children }) => {
           <Link to="/">{title}</Link>
         </h1>
         <div>
-          <span>Software Engineer @ Ethereum Foundation (PSE)</span>
+          <span>Software Engineer </span>
           <span>&nbsp; | &nbsp;</span>
           <span>
             Github: <a target="_blank" rel="nofollow noreferrer" href="https://github.com/saleel">@saleel</a>
