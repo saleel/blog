@@ -16,15 +16,15 @@ const Layout = ({ location, title, children }) => {
           <span>Software Engineer - Ethereum Foundation (PSE)</span>
           <span>&nbsp; | &nbsp;</span>
           <span>
-            Github: <a target="_blank" rel="nofollow noreferrer" href="https://github.com/saleel">@saleel</a>
+            <strong>Github</strong>: <a target="_blank" rel="nofollow noreferrer" href="https://github.com/saleel">@saleel</a>
           </span>
           <span>&nbsp; | &nbsp;</span>
           <span>
-            Twitter: <a target="_blank" rel="nofollow noreferrer" href="https://twitter.com/_saleel">@_saleel</a>
+            <strong>Twitter</strong>: <a target="_blank" rel="nofollow noreferrer" href="https://twitter.com/_saleel">@_saleel</a>
           </span>
           <span>&nbsp; | &nbsp;</span>
           <span>
-            Telegram: <code>saleelp</code>
+            <strong>Telegram</strong>: <code>saleelp</code>
           </span>
         </div>
         <hr />
