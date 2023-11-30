@@ -1,12 +1,12 @@
 ---
 title: Building Email Wallet
-date: "2023-10-02"
+date: "2023-11-30"
 description: "Overview of designs and challenges when building Email Wallet."
 ---
 
 ### Introduction
 
-This is an introduction to the [Email Wallet](https://github.com/zkemail/email-wallet) project - explaining what it does and how it works technically.
+This is a technical introduction to the [Email Wallet](https://github.com/zkemail/email-wallet) project - explaining what it does and how it works internally.
 
 Email Wallet is a smart contract wallet that can be operated using emails. Essentially one can **interact with Ethereum blockchain by simply sending emails**.
 
