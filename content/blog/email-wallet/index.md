@@ -200,7 +200,7 @@ Many of the above restrictions are to force Relayer to be honest and censorship 
 
 For this, a 4337 wallet could be explored, and user's browser can call a Bundler with proof of email as the `UserOp` signature. Account key can be a PIN code entered by the user and stored in the browser.
 
-However, a client side proving will require user copy the whole email content and paste to a web app. This is a bad UX considering sending money is a frequent use-case and demand a simple UX that also works from mobile.
+However, a client side proving will require user copy the whole email content and paste to a web app. **This is a bad UX** considering sending money is a frequent use-case and demand a simple UX that also works from mobile.
 
 <hr />
 
@@ -208,10 +208,4 @@ However, a client side proving will require user copy the whole email content an
 
 Email Wallet has the potential to onboard many new users to Ethereum. Users can interact with Ethereum without knowing anything about wallets, private keys, gas, etc. 
 
-There are improvements that can be done the protocol and the overall UX. Some of the things we are exploring are:
-
-- Simplify protocol by removing some `EmailPointer`, remove `timestamp` validation and find a different solution for "nonce" issue.
-- UX improvements on creating account, sending to ENS, etc.
-- Explore EIP-4337 based account.
-- Explore using Email as a recovery solution for existing contract wallets.
-
+While there are many improvements that can be done to the protocol and the overall UX, both ZK Email and Email wallet is interesting primitives that can be used to build many other applications.
