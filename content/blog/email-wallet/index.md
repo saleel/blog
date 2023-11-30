@@ -28,7 +28,7 @@ Here is a quick overview of how ZK Email works; for more details, please refer t
 - Information needed to be disclosed can be added as public input of the circuit.
 - [**ZK-Regex**](https://github.com/zkemail/zk-regex/) is used to **extract and prove specific information** from email content using regular expressions.
 - In short, you can prove you have an email "sent from an email address", "contains a particular subject", or "have a specific word in the body".
-- **Smart contracts can verify the proof on-chain** by validating that the DKIM public key used in the circuit is the same as the one stored in the on-chain [DKIM Registry](https://github.com/zkemail/zk-email-verify/blob/43927dfcd954caba58e02e06ec96c78c386e8598/packages/contracts/DKIMRegistry.sol) for the domain.
+- **Smart contracts can verify the proof on-chain** by validating that the DKIM public key used when generating the proof is the same as the one stored in the on-chain [DKIM Registry](https://github.com/zkemail/zk-email-verify/blob/43927dfcd954caba58e02e06ec96c78c386e8598/packages/contracts/DKIMRegistry.sol) for the domain.
 
 ### Email Wallet
 
@@ -187,6 +187,7 @@ When the user wants to use a new relayer, they forward their original account cr
 Related circuit: [AccountTransport](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/account_transport.circom)
 Related contract: [RelayerHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/RelayerHandler.sol)
 
+
 #### Relayer Communication
 As there are multiple relayers and users could be "registered" with different relayers, there is a problem when a user sends money to an email address that is registered under a different relayer.
 
@@ -212,6 +213,19 @@ Core contract is designed to do fee reimbursement even if an EmailOp execution f
 Relayer pays the fee for creating/initializing new accounts though. To prevent DOS attacks, Relayers can have necessary checks - for example, create accounts only for users who have registered an UnclaimedFund with a minimum amount.
 
 Relevant contract code [here](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/EmailWalletCore.sol#L246-L281).
+
+
+#### On-chain DKIM Registry
+
+Proof verification involves verifying the DKIM public key used when generating the proof is the same as the one stored on-chain before (in a DKIM Registry). This adds a trust assumption on the DKIM Registry and people(s) who have control over updating public keys for a domain.
+
+As a solution, we allow Email Wallet users to **use a custom DKIM Registry** to verify their emails.
+
+Users can deploy their own DKIM registry and set the public keys for their email domain. They can then send an email with a subject like `DKIM registry set to 0x1ababab` with their registry contract address.
+
+We use the hash of `DKIMPublicKey` as the circuit output (and in the registry) instead of the public key directly to save on gas costs (as the public key is large).
+
+Relevant contract code [here](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/AccountHandler.sol#L232-L260).
 
 
 #### EIP-4337
