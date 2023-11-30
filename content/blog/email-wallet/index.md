@@ -1,7 +1,7 @@
 ---
 title: Building Email Wallet
 date: "2023-11-30"
-description: "Overview of designs and challenges when building Email Wallet."
+description: "Exploring how Email Wallet works and some of the design challenges."
 ---
 
 ### Introduction
@@ -12,7 +12,7 @@ Email Wallet is a smart contract wallet that can be operated using emails. Essen
 
 Email Wallet is build on top of [ZK Email](https://github.com/zkemail/zk-email-verify). ZK Email use ZK Snarks to prove possession of an email and can selectively disclosing information contained in the email.
 
-***Credits**: ZK Email was originally created by Aayush, Sora, and Sampriti. Email Wallet was introduced (and many of the spec below was created) by Sora. Myself, Sora, Aayush, Rasul, Wataru, Elo, Tyler worked on the development of Email Wallet with the support of [PSE](https://pse.dev/). Please check [Zk Email Org](https://github.com/zkemail) for more details.*
+***Credits**: ZK Email was originally created by Aayush, Sora, and Sampriti. Email Wallet was introduced (and many of the spec below was created) by Sora. Myself, Sora, Aayush, Rasul, Wataru, Elo, Tyler worked on the development of Email Wallet. Please check [Zk Email Org](https://github.com/zkemail) for more details.*
 
 ### ZK Email
 
