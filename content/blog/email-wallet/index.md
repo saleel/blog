@@ -196,7 +196,7 @@ To solve this, we have a **relayer communication protocol using PSI** (Private S
 
 If the sender's Relayer finds another relayer who has an account for the recipient (by verifying the returned PSI point on-chain), they send the randomness used in `EmailCommitment` of UnclaimedFund to the recipient's relayer. The recipient's relayer can then use this to generate proof and claim the funds to the recipient's account.
 
-If sender's Relayer cannot find any matching PSI points from any other relayer, they invite the recipient to create an account with them.
+If the sender's Relayer cannot find any matching PSI points from any other relayer, they invite the recipient to create an account with them.
 
 Related circuits: [AccountCreation](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/account_creation.circom#L28)
 
@@ -229,7 +229,7 @@ Many of the above restrictions are to force the Relayer to be honest and censors
 
 For this, a 4337 wallet could be explored, where the user's browser calls 4337 Bundler with proof of email as the `UserOp` signature. The account key can be a PIN code entered by the user and stored in the browser.
 
-However, a client-side proving will require the user to copy the whole email content and paste in to a web app. **This is a bad UX** considering sending money is a frequent use-case and demands a simple UX that also works from mobile.
+However, a client-side proving will require the user to copy the whole email content and paste it to a web app. **This is a bad UX** considering sending money is a frequent use-case and demands a simple UX that also works from mobile.
 
 On the other hand, **users could self-host Relayer on their own computer** to avoid trusting a third party.
 
