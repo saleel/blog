@@ -10,40 +10,40 @@ This is a technical introduction to the [Email Wallet](https://github.com/zkemai
 
 Email Wallet is a smart contract wallet that can be operated using emails. Essentially one can **interact with Ethereum blockchain by simply sending emails**.
 
-Email Wallet is build on top of [ZK Email](https://github.com/zkemail/zk-email-verify). ZK Email use ZK Snarks to prove possession of an email and can selectively disclosing information contained in the email.
+Email Wallet is built on top of [ZK Email](https://github.com/zkemail/zk-email-verify). ZK Email uses ZK Snarks to prove possession of an email and can selectively disclosing information contained in the email.
 
-***Credits**: ZK Email was originally created by Aayush, Sora, and Sampriti. Email Wallet was introduced (and many of the spec below was created) by Sora. Myself, Sora, Aayush, Rasul, Wataru, Elo, Tyler worked on the development of Email Wallet. Please check [Zk Email Org](https://github.com/zkemail) for more details.*
+**Credits**: ZK Email was originally created by Aayush, Sora, and Sampriti. Email Wallet was introduced (and much of the spec below was created) by Sora. Sora, Aayush, myself, Rasul, Wataru, Elo worked on the development of Email Wallet. Please check [Zk Email Org](https://github.com/zkemail) for more details.*
 
 ### ZK Email
 
-Here is a quick overview of how ZK Email works. For more details, please refer to the [Aayush's blog](https://blog.aayushg.com/zkemail/) on the same:
+Here is a quick overview of how ZK Email works; for more details, please refer to the [Aayush's blog](https://blog.aayushg.com/zkemail/) on the same:
 
 - Emails are (almost always) signed by the sender's email provider using a protocol called [DKIM Signatures](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail).
 - The `From Address`, `Subject` and `Body` (hashed) of the email are usually always signed. The details of the signed fields, algorithm used and the signature itself is included in the `DKIM-Signature` header of the email.
 - `rsa-sha256` is the most common signature algorithm used by email providers.
 - The public key used for signing is published as a DNS record of the sender's domain. The `selector` needed to query right DNS record is part of the `DKIM-Signature` header.
-- **ZK Email use ZK circuit to verify the email signature using the DKIM public key** and prove necessary properties of the email, without exposing the whole email.
+- **ZK Email use a ZK circuit to verify the email signature using the DKIM public key** and prove necessary properties of the email, without exposing the whole email.
 - Information needed to disclose can be added as public input of the circuit.
-- [**ZK-Regex**](https://github.com/zkemail/zk-regex/) is used to **extract/prove specific information** from the email content using regular expressions.
+- [**ZK-Regex**](https://github.com/zkemail/zk-regex/) is used to **extract and prove specific information** from the email content using regular expressions.
 - In short, you can prove you have an email "sent from an email address", "contains a particular subject", or "have a specific word in the body".
 - **Smart contracts can verify the proof on-chain** by validating the DKIM public key used in circuit is same as the one stored in the on-chain [DKIMRegistry](https://github.com/zkemail/zk-email-verify/blob/43927dfcd954caba58e02e06ec96c78c386e8598/packages/contracts/DKIMRegistry.sol) for the domain.
 
 ### Email Wallet
 
-Email Wallet use **proof of email from a user to operate the user's Ethereum account** (contract wallet). Basically, the DKIM email signature act as the signature for user's Ethereum account (instead of a private key held in Metamask for example).
+Email Wallet uses **proof of email from a user to operate the user's Ethereum account** (contract wallet). Basically, the DKIM signature acts as the signature for the user's Ethereum account (instead of a private key held in Metamask for example).
 
-DKIM signatures can be directly verified on-chain, but this would reveal the whole email content and users wont have any privacy. This is why using ZK Email is important - we can create proof of necessary information from email content without revealing user's or recipient's email address.
+DKIM signatures can be directly verified on-chain, but this would reveal the entire email content and users won't have any privacy. This is why using ZK Email is important - we can create a proof of necessary information from email content without revealing user's or recipient's email address.
 
 
 #### How it works
 
-A new **account contract is deployed for each user** which holds the user's funds. The `owner` of this contract can execute any calldata on any target contract on behalf of the the account. See [Wallet.sol](https://github.com/zkemail/email-wallet/blob/7eb2a7c977133b24b191aff0311dc14027daf03f/packages/contracts/src/Wallet.sol#L51-L63)
+A new **account contract is deployed for each user** which holds the user's funds. The `owner` of this contract can execute any calldata on any target contract on behalf of the account. See [Wallet.sol](https://github.com/zkemail/email-wallet/blob/7eb2a7c977133b24b191aff0311dc14027daf03f/packages/contracts/src/Wallet.sol#L51-L63)
 
 The `owner` of the account contract is the EmailWalletCore contract by default. Core contract validates the `EmailOperation` and execute the intended "operation" on Wallet contract. See [EmailWalletCore.sol](https://github.com/zkemail/email-wallet/blob/7eb2a7c977133b24b191aff0311dc14027daf03f/packages/contracts/src/EmailWalletCore.sol)
 
 
 Basically the flow works like this:
-- **Users send email to a "Relayer"** server with their intend in the email subject. For Example - `Send 10 DAI to friend@gmail.com`
+- **Users send email to a "Relayer"** server with their intent in the email subject. For Example - `Send 10 DAI to friend@gmail.com`
 - The **relayer create the ZK proof of the mail** and calls the Core contract (`handleEmailOp`) with proof of email and parameters extracted from the subject.
 - The **Core contract validate the proof** and ensure extracted parameters match the actual signed subject, and **execute the operation on the account contract**.
 
@@ -51,7 +51,7 @@ Basically the flow works like this:
 
 Below are some things you could do with Email Wallet, and corresponding **examples of email subjects** user should send:
 
-- Send ETH to email address and Ethereum addresses.
+- Send ETH to an email address and Ethereum addresses.
   - `Send 1 ETH to friend@domain.com`
   - `Send 2.5 ETH to 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266`
 
@@ -86,9 +86,11 @@ So the address of account contract is derived from an **`Account Key`** which is
 
 Users create an email wallet by sending email to Relayer with subject like `Create Account with CODE:0xababab11` where the last part after `CODE:` is the Account Key.
 
+Relayer registers new account for a user with a commitment like `hash(emailAddress, accountKey)`. Relayer uses this commitment to prove that email came from the same user later when the user sends an email with an operation. i.e, this commitment is an output of circuit that generate proof of email from user for an operation. See `AccountKeyCommitment` below.
+
 #### Account nullifier
 
-**Relayer creates an account for the user** in Core contract which deploys a account contract for the user. Relayer need to produce a <ins>proof email from the user with AccountKey containing anywhere in email headers</ins>.
+**The Relayer creates an account for the user** in Core contract which deploys a account contract for the user. Relayer need to produce a <ins>proof email from the user with AccountKey containing anywhere in email headers</ins>.
 
 To prevent relayer from creating multiple account for same email address, Relayer need to commit to user's email address and the account key.
 
@@ -104,7 +106,7 @@ Core contract ensure EmailPointer and AccountKeyCommitment are unique.
 #### Subject validation
 Extracting the parameters from email subject is difficult to do on-chain. 
 
-Instead, **Relayer extract the subject parameters off-chain and is passed as [EmailOp](https://github.com/zkemail/email-wallet/blob/7eb2a7c977133b24b191aff0311dc14027daf03f/packages/contracts/src/interfaces/Types.sol#L11-L32), and Core contract construct the subject from the EmailOp, and validate it against the signed subject** (which is also passed in the EmailOp). 
+Instead, **Relayer extract the subject parameters off-chain and are passed as [EmailOp](https://github.com/zkemail/email-wallet/blob/7eb2a7c977133b24b191aff0311dc14027daf03f/packages/contracts/src/interfaces/Types.sol#L11-L32), and Core contract construct the subject from the EmailOp, and validate it against the signed subject** (which is also passed in the EmailOp). 
 
 Note that, verifying the proof of email (which happens in `handleEmailOp`) ensure the subject was actually sent by the user.
 
@@ -120,14 +122,14 @@ There are cases where an Email from user should be considered as "outdated".
 
 - For example, user send email to Relayer A, but their server is "down" at that moment and user don't get a response. User send the same email to Relayer B which execute the transaction. Relayer A comes back online later and process the email, ending up executing the "same" transaction twice.
 
-- Relayer execute multiple emails from the same user in different order, either by mistake (maybe due to race conditions when processing emails in parallel) or maliciously.
+- Relayer executes multiple emails from the same user in different order, either by mistake (maybe due to race conditions when processing emails in parallel) or maliciously.
 
 We can use the `timestamp` used in the DKIM signature to prevent both cases.
 
 The core contract can prevent emails older than a limit, and a user should only email another relayer if they don't see the transaction executed by the original relayer within a limit. 
 Timestamp can also be used a "nonce" to prevent the second case by allowing operations with only increasing timestamps.
 
-However, **not all providers include the timestamp** in the DKIM signature. While this is implemented now (first case), it need to be removed and replaced with a solution that works for all providers.
+However, **not all email providers include the timestamp** in the DKIM signature. While this is implemented now (first case), it needs to be removed and replaced with a solution that works for all providers.
 
 
 #### Sending money to unregistered emails
@@ -138,7 +140,7 @@ For this we introduce something called **Unclaimed Funds**. When a user send tok
 
 Once recipient creates an account, recipient's relayer can claim the unclaimed funds by providing proof that recipient's `AccountKeyCommitment` and UnclaimedFund's `EmailCommitment` are from the same email address.
 
-`UnclaimedFunds` has an expiry of 30 days. So incase recipient do not create an account within 30 days, the sender can claim the funds back (which is automatically done by relayer).
+`UnclaimedFunds` have an expiry of 30 days. So in case the recipient do not create an account within 30 days, the sender can claim the funds back (which is automatically done by relayer).
 
 An EmailOp can have either a ETH recipient address or a commitment to recipient's email address.
 
@@ -167,7 +169,7 @@ When user want to use a new relayer, they forward their original account creatio
 #### Relayer Communication
 As there are multiple relayers and users could be "registered" with different relayers, there is a problem when a user send money to an email address which is registered under a different relayer.
 
-i.e when a user send money to an email address, an UnclaimedFund is created for them. But since the sender's relayer don't have an account for the recipient, they cannot claim the UnclaimedFund to recipient's account.
+i.e, when a user send money to an email address, an UnclaimedFund is created for them. But since the sender's relayer don't have an account for the recipient, they cannot claim the UnclaimedFund to recipient's account.
 
 To solve this, we have a **relayer communication protocol using PSI** (Private Set Intersection). Relayer's commit a PSI point for each account on-chain when creating an account. Relayers communicate using API to check if they have an account for a particular email address without revealing the email address (using PSI).
 
@@ -176,36 +178,45 @@ If sender's relayer finds another relayer who has an account for the recipient (
 If sender's Relayer cannot find any matching PSI points from any other relayer, they invite the recipient to create an account with them.
 
 #### Relayer Incentives
-Relayer pay the gas for creating account and executing EmailOps. To incentivize the Relayer to do this, we have a fee reimbursement mechanism.
+Relayers pay the gas for creating account and executing EmailOps. To incentivize the Relayer to do this, we have a fee reimbursement mechanism.
 
 Relayers can set `feeToken` and `feePerGas` value in the EmailOp (below the max value allowed in the Core contract). After each EmailOp, the Core contract reimburse the relayer with `feePerGas * gasUsed` amount of ETH equivalent in `feeToken`. 
 
-Relayers **profit on the difference between `feePerGas` in the EmailOp and actual market gas fee**. 
+Relayers **profit from the difference between `feePerGas` in the EmailOp and actual market gas fee**. 
 
 Core contract is designed to do fee reimbursement even if a EmailOp execution fails (for example due to some error in an extensions). But if a transaction fails in validation phase, the relayer is not reimbursed. To prevent this, Relayer should dry-run a transaction before executing it on-chain. A transaction passing locally is expected to pass on-chain.
 
-Relayer's pay the fee for creating/initializing new accounts (not recipients of a email transaction) though. To prevent DOS attacks, Relayers can have necessary checks - for example, create accounts only for users who have registered an UnclaimedFund with a minimum amount.
+Relayer pays the fee for creating/initializing new accounts though. To prevent DOS attacks, Relayers can have necessary checks - for example, create accounts only for users who have registered an UnclaimedFund with a minimum amount.
 
 
 #### EIP-4337
 Account Abstraction EIP-4337 was considered for Email Wallet. However it is not implemented in the current version of Email Wallet.
 
-Email Wallet require a Relayer to generate the proof of email. A design where Relayer generate proof and call the 4337 Bundler with UserOp can help the protocol in regards to fee reimbursement (paymasters) and ensuring transactions passing in simulation also pass during execution.
+Email Wallet require a Relayer to listen to emails from user and generate the proof of email. This is not something a 4337 bundler can do.
 
-While [some hacks](https://saleel.xyz/blog/zk-account-abstraction/) are required to make this work, a 4337 account can be explored in future.
+A design where Relayer generates the proof and calls the 4337 Bundler with `UserOp` can be done (with [some hacks](https://saleel.xyz/blog/zk-account-abstraction/) to overcome 4337 storage restrictions), but this don't offer a lot of advantages. *One advantage would be ensuring simulated transactions also pass during execution - though chances of this happening otherwise is also very less.*
+
+Nonetheless, a 4337 account for Email Wallet can be explored in the future if the ecosystem offers a lot of value.
 
 
 #### Client side proving
-Many of the above restrictions are to force Relayer to be honest and censorship resistant. If we can have the emails proven on the client side (browser), we can skip the Relayer and have the user broadcast transactions directly.
+Many of the above restrictions are to force the Relayer to be honest and censorship resistant. If we can have the emails proven on the client side (browser), we can skip the Relayer and have the user broadcast transactions directly.
 
-For this, a 4337 wallet could be explored, and user's browser can call a Bundler with proof of email as the `UserOp` signature. Account key can be a PIN code entered by the user and stored in the browser.
+For this, a 4337 wallet could be explored, where the user's browser calls 4337 Bundler with proof of email as the `UserOp` signature. Account key can be a PIN code entered by the user and stored in the browser.
 
-However, a client side proving will require user copy the whole email content and paste to a web app. **This is a bad UX** considering sending money is a frequent use-case and demand a simple UX that also works from mobile.
+However, a client side proving will require user to copy the whole email content and paste to a web app. **This is a bad UX** considering sending money is a frequent use-case and demands a simple UX that also works from mobile.
+
+On the other hand, **users could self-host Relayer in their own computer** to avoid trusting a third party.
 
 <hr />
 
 ### Conclusion
 
-Email Wallet has the potential to onboard many new users to Ethereum. Users can interact with Ethereum without knowing anything about wallets, private keys, gas, etc. 
+Email Wallet has the potential to onboard many new users to Ethereum. Users can interact with Ethereum without knowing anything about wallets, private keys, gas, etc.
 
-While there are many improvements that can be done to the protocol and the overall UX, both ZK Email and Email wallet is interesting primitives that can be used to build many other applications.
+Email Wallet is **a gateway to Ethereum**, and not just a simple way for sending money. Developers can build extensions to allow users to interact with their smart contracts by sending emails. This can be used to build many interesting applications apart from Defi.
+
+For example, Email Wallet could be used as **a recovery solution for other contract wallets**. Or email could be used as one of the key for a multi-sig. (We and other teams are exploring more on this.)
+
+If you are interested in building on top of ZK Email and Email Wallet, please join our [Telegram group](https://t.me/zkemail).
+
