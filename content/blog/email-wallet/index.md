@@ -203,11 +203,10 @@ For this, a 4337 wallet could be explored, and user's browser can call a Bundler
 However, a client side proving will require user copy the whole email content and paste to a web app. This is a bad UX considering sending money is a frequent use-case and demand a simple UX that also works from mobile.
 
 <hr />
-<br />
 
 ### Conclusion
 
-Email Wallet has the potential to onboard new users to Ethereum. Users can interact with Ethereum without knowing anything about wallets, private keys, gas, etc. 
+Email Wallet has the potential to onboard many new users to Ethereum. Users can interact with Ethereum without knowing anything about wallets, private keys, gas, etc. 
 
 There are improvements that can be done the protocol and the overall UX. Some of the things we are exploring are:
 

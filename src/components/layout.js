@@ -13,10 +13,18 @@ const Layout = ({ location, title, children }) => {
           <Link to="/">{title}</Link>
         </h1>
         <div>
-          <span>Software Engineer </span>
+          <span>Software Engineer - Ethereum Foundation (PSE)</span>
           <span>&nbsp; | &nbsp;</span>
           <span>
             Github: <a target="_blank" rel="nofollow noreferrer" href="https://github.com/saleel">@saleel</a>
+          </span>
+          <span>&nbsp; | &nbsp;</span>
+          <span>
+            Twitter: <a target="_blank" rel="nofollow noreferrer" href="https://twitter.com/_saleel">@_saleel</a>
+          </span>
+          <span>&nbsp; | &nbsp;</span>
+          <span>
+            Telegram: <a target="_blank" rel="nofollow noreferrer" href="https://github.com/saleel">@saleelp</a>
           </span>
         </div>
         <hr />
