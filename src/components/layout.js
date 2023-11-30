@@ -24,7 +24,7 @@ const Layout = ({ location, title, children }) => {
           </span>
           <span>&nbsp; | &nbsp;</span>
           <span>
-            Telegram: <a target="_blank" rel="nofollow noreferrer" href="https://github.com/saleel">@saleelp</a>
+            Telegram: <code>saleelp</code>
           </span>
         </div>
         <hr />
