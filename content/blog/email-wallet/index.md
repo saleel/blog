@@ -1,8 +1,10 @@
 ---
 title: Building Email Wallet
 date: "2023-11-30"
-description: "Exploring how Email Wallet works and some of the design challenges."
+description: "Exploring Email Wallet and diving into some of the design challenges."
 ---
+
+*Special thanks to Aayush for the review and suggestions*
 
 ### Introduction
 
@@ -12,7 +14,7 @@ Email Wallet is a smart contract wallet that can be operated using emails. Essen
 
 Email Wallet is built on top of [ZK Email](https://github.com/zkemail/zk-email-verify). ZK Email uses ZK Snarks to prove possession of an email and can selectively disclosing information contained in the email.
 
-**Credits**: ZK Email was originally created by Aayush, Sora, and Sampriti. Email Wallet was introduced (and much of the spec below was created) by Sora. Sora, Aayush, myself, Rasul, Wataru, Elo worked on the development of Email Wallet. Please check [Zk Email Org](https://github.com/zkemail) for more details.*
+***Credits**: ZK Email was originally created by [Aayush](https://twitter.com/yush_g), [Sora](https://twitter.com/SoraSue77), and [Sampriti](https://twitter.com/SoraSue77). Email Wallet was introduced (and much of the spec below was created) by Sora. Sora, Aayush, myself, [Rasul](https://curryrasul.com/), [Wataru](https://github.com/wshino), [Elo](https://github.com/Metachaser24) worked on the development of Email Wallet. Please check [Zk Email Org](https://github.com/zkemail) for more details.*
 
 ### ZK Email
 
@@ -103,6 +105,9 @@ Core contract ensure EmailPointer and AccountKeyCommitment are unique.
 
 *We can actually remove `EmailPointer` by having the circuit check for the Account Key using a specific prefix that is less likely to be found in "other" emails. The `CODE` prefix does this already and `EmailPointer` can be removed in future versions of Email Wallet.*
 
+Related circuits: [AccountCreation](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/account_creation.circom) and [AccountInitialization](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/account_init.circom).
+Related contract: [AccountHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/AccountHandler.sol)
+
 #### Subject validation
 Extracting the parameters from email subject is difficult to do on-chain. 
 
@@ -112,10 +117,16 @@ Note that, verifying the proof of email (which happens in `handleEmailOp`) ensur
 
 For privacy reasons, email address (of recipient) is masked and is replaced with 0 bits when its output from the circuit.
 
+Related circuits: [EmailSender](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/email_sender.circom).
+Related contract: [SubjectUtils.sol](
+https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/libraries/SubjectUtils.sol)
+
 #### Email Nullifier
 To prevent relayer from using same email to create multiple EmailOps, we need to add a nullifier to each email proof.
 
 Currently nullifier is generated in the circuit using `hash(emailSignature)`. The core **contract maintains used nullifiers**, and thus ensure each email is used only once.
+
+Related circuits: [EmailSender](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/email_sender.circom#L118)
 
 #### Email expiry and transaction ordering
 There are cases where an Email from user should be considered as "outdated".
@@ -146,6 +157,7 @@ An EmailOp can have either a ETH recipient address or a commitment to recipient'
 
 `UnclaimedFunds` can also registered externally. This allows non email wallet users to send money to an email by registering an unclaimed funds, and then sharing the `EmailCommitment` with recipient's (or any) Relayer.
 
+Related contract: [UnclaimsHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/UnclaimsHandler.sol)
 
 #### Extensions
 
@@ -157,6 +169,8 @@ To prevent misuse, extensions can only `execute` on user's account contract when
 
 We also have a concept of `UnclaimedState` similar to `UnclaimedFund` above, where extensions can use it to store custom "state" for email wallet users. This can be used to build NFT extension (for example) where `tokenAddr + tokenId` is stored in the `UnclaimedState`.
 
+Related contract: [UnclaimsHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/ExtensionHandler.sol) and [AccountHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/AccountHandler.sol#L163)
+
 
 #### Relayer Censorship
 Since users need to send emails to Relayer to operate their wallet, the Relayer has the power to censor users.
@@ -165,6 +179,8 @@ To overcome this, we have a permission-less relayer network where **anyone can r
 
 When user want to use a new relayer, they forward their original account creation email to new relayer. Since this email contain the user's account key, new relayer can "transport" their account using the proof of email from user containing account key. This way users can use any relayer by maintaining same wallet address.
 
+Related circuit: [AccountTransport](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/account_transport.circom)
+Related contract: [RelayerHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/RelayerHandler.sol)
 
 #### Relayer Communication
 As there are multiple relayers and users could be "registered" with different relayers, there is a problem when a user send money to an email address which is registered under a different relayer.
@@ -177,6 +193,8 @@ If sender's relayer finds another relayer who has an account for the recipient (
 
 If sender's Relayer cannot find any matching PSI points from any other relayer, they invite the recipient to create an account with them.
 
+Related circuits: [AccountCreation](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/account_creation.circom#L28)
+
 #### Relayer Incentives
 Relayers pay the gas for creating account and executing EmailOps. To incentivize the Relayer to do this, we have a fee reimbursement mechanism.
 
@@ -187,6 +205,8 @@ Relayers **profit from the difference between `feePerGas` in the EmailOp and act
 Core contract is designed to do fee reimbursement even if a EmailOp execution fails (for example due to some error in an extensions). But if a transaction fails in validation phase, the relayer is not reimbursed. To prevent this, Relayer should dry-run a transaction before executing it on-chain. A transaction passing locally is expected to pass on-chain.
 
 Relayer pays the fee for creating/initializing new accounts though. To prevent DOS attacks, Relayers can have necessary checks - for example, create accounts only for users who have registered an UnclaimedFund with a minimum amount.
+
+Relevant contract code [here](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/EmailWalletCore.sol#L246-L281).
 
 
 #### EIP-4337
@@ -218,5 +238,6 @@ Email Wallet is **a gateway to Ethereum**, and not just a simple way for sending
 
 For example, Email Wallet could be used as **a recovery solution for other contract wallets**. Or email could be used as one of the key for a multi-sig. (We and other teams are exploring more on this.)
 
-If you are interested in building on top of ZK Email and Email Wallet, please join our [Telegram group](https://t.me/zkemail).
+**You can learn more about Email Wallet circuits [here](https://github.com/zkemail/email-wallet/tree/main/packages/circuits), and the contracts [here](https://github.com/zkemail/email-wallet/tree/main/packages/contracts).**
 
+If you are interested in building on top of ZK Email or Email Wallet, please join our [Telegram group](https://t.me/zkemail).
