@@ -331,3 +331,16 @@ a:focus {
   }
 }
 
+.blog-post code {
+  background-color: #E8E9E6 !important;
+  color: #E43F46 !important;
+  padding: 0.1rem 0.3rem !important;
+  letter-spacing: 0.5px !important;
+  font-weight: 600 !important;
+  border-radius: 1px !important;
+}
+
+.blog-post a {
+  font-weight: 600 !important;
+  letter-spacing: 0.5px !important;
+}
