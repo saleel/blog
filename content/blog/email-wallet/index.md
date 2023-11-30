@@ -67,10 +67,10 @@ Below are some things you could do with Email Wallet and corresponding **example
 
 Apart from the simple token transfer operations, developers can build **extensions to interact with other contracts**. For example, we have built an NFT extension for ERC721 token transfers and a Uniswap extension for swapping tokens.
 
-- Once extensions are published, Users can install them with subjects like:
+- Once extensions are published, users can install them with subjects like:
   - `Install extension Uniswap`
   - and use the extensions with subjects like `Swap 1 ETH to DAI`
-  - Here the `Swap` "command" is defined by the Uniswap extension when it is published (along with the name and extension contract address).
+  - Here, the `Swap` "command" is defined by the Uniswap extension when it is published (along with the name and extension contract address).
 
 - The user can also exit Email Wallet by sending an email like:
   - `Exit Email Wallet. Set owner to 0xf66f...`
@@ -84,19 +84,19 @@ There were many problems and technical challenges we faced when building Email W
 #### Email Address Privacy
 For privacy reasons, we **do not want to reveal the email address** of the users (nor the hash of the email address) on-chain.
 
-So the address of the account contract is derived from an **`Account Key`** which is a randomly generated value. Specifically, the `CREATE2` salt of the user's account contract is `hash(accountKey, 0)`. 
+So the address of the account contract is derived from an **`AccountKey`** which is a randomly generated value. Specifically, the `CREATE2` salt of the user's account contract is `hash(accountKey, 0)`. 
 
 **Relayer maintains the mapping between an email address and the account key.**
 
 Users create an email wallet by sending an email to Relayer with a subject like `Create Account with CODE:0xababab11` where the last part after `CODE:` is the Account Key.
 
-Relayer registers a new account for a user with a commitment like `hash(emailAddress, accountKey)`. Relayer uses this commitment to prove that the email came from the same user later when the user sends an email with an operation. i.e. this commitment is an output of the circuit that generates proof of email from the user for an operation. See `AccountKeyCommitment` below.
+Relayer registers a new account for a user with a commitment like `hash(emailAddress, accountKey)`. Relayer uses this commitment to prove that the email came from the same user later, when the user sends an email with an operation. i.e. this commitment is an output of the circuit that generates proof of email from the user for an operation. See `AccountKeyCommitment` below.
 
 Related circuits: [EmailSender](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/email_sender.circom#L118)
 
 #### Account nullifier
 
-**The Relayer creates an account for the user** in Core contract which deploys an account contract for the user. Relayer needs to produce a <ins>proof of email from the user with AccountKey containing anywhere in email headers</ins>.
+**The Relayer creates an account for the user** in the Core contract which deploys an account contract for the user. Relayer needs to produce a <ins>proof of email from the user with AccountKey containing anywhere in email headers</ins>.
 
 To prevent Relayer from creating multiple accounts for the same email address, Relayer needs to commit to the user's email address and the account key.
 
@@ -104,21 +104,21 @@ Relayer maintains a secret value `relayerSecret` and commits `hash(relayerSecret
 
 Core contract ensures EmailPointer and AccountKeyCommitment are unique.
 
-- **`AccountKeyCommitment` ensures that the user has explicitly sent an email to Relayer with Account Key** before the relayer can execute EmailOps for the user. This will prevent emails with matching subjects sent to random people for other purposes being used for EmailOps.
-- **`EmailPointer` ensures Relayer can only create one account for one email address**. This will prevent malicious Relayer from using random values from multiple emails as the account key. This will also prevent the user from "accidentally" creating multiple accounts for the same email address (in case the Relayer doesn't check existence of the email address off-chain).
+- **`AccountKeyCommitment` ensures that the user has explicitly sent an email to Relayer with Account Key** before the relayer can execute EmailOps for the user. This will prevent emails with matching subjects sent to random people for other purposes from being used for EmailOps.
+- **`EmailPointer` ensures Relayer can only create one account for one email address**. This will prevent malicious Relayer from using random values from multiple emails as the account key. This will also prevent the user from "accidentally" creating multiple accounts for the same email address (in case the Relayer doesn't check the existence of the email address off-chain).
 
-*We can remove `EmailPointer` by having the circuit check for the Account Key using a specific prefix that is less likely to be found in "other" emails. The `CODE` prefix does this already and `EmailPointer` can be removed in future versions of Email Wallet.*
+*We can remove `EmailPointer` by having the circuit check for the Account Key using a specific prefix that is less likely to be found in "other" emails. The `CODE` prefix does this already, and `EmailPointer` can be removed in future versions of Email Wallet.*
 
-Related code: [AccountCreation circuit](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/account_creation.circom), [AccountInitialization circuit](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/account_init.circom) and [AccountHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/AccountHandler.sol).
+Related code: [AccountCreation circuit](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/account_creation.circom), [AccountInitialization circuit](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/account_init.circom), and [AccountHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/AccountHandler.sol).
 
 #### Subject validation
 Extracting the parameters from an email subject is difficult to do on-chain. 
 
-Instead, **Relayer extracts the subject parameters off-chain and are passed as [EmailOp](https://github.com/zkemail/email-wallet/blob/7eb2a7c977133b24b191aff0311dc14027daf03f/packages/contracts/src/interfaces/Types.sol#L11-L32), and Core contract constructs the subject from the EmailOp, and validates it against the signed subject** (which is also passed in the EmailOp). 
+Instead, **Relayer extracts the subject parameters off-chain and is passed in [EmailOp](https://github.com/zkemail/email-wallet/blob/7eb2a7c977133b24b191aff0311dc14027daf03f/packages/contracts/src/interfaces/Types.sol#L11-L32), and Core contract constructs the subject from the EmailOp, and validates it against the signed subject** (which is also passed in the EmailOp). 
 
-Note that, verifying the proof of email (which happens in `handleEmailOp`) ensures the subject was sent by the user.
+Note that verifying the proof of email (which happens in `handleEmailOp`) ensures the subject was sent by the user.
 
-For privacy reasons, the email address (of the recipient) is masked and is replaced with 0 bits when it is output from the circuit.
+For privacy reasons, the email address (of the recipient) is masked and replaced with 0 bits when it is output from the circuit.
 
 Related code: [EmailSender circuit](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/email_sender.circom) and [SubjectUtils.sol contract](
 https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/libraries/SubjectUtils.sol)
@@ -126,14 +126,14 @@ https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8e
 #### Email Nullifier
 To prevent Relayer from creating multiple transactions from the same email address, we need to add a nullifier to each email proof.
 
-Currently nullifier is generated in the circuit using `hash(emailSignature)`. The core **contract maintains used nullifiers**, and thus ensures each email is used only once.
+Currently, the nullifier is generated in the circuit using `hash(emailSignature)`. The core **contract maintains used nullifiers**, and thus ensures each email is used only once.
 
 Related code: [EmailSender circuit](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/email_sender.circom#L118)
 
-#### Email expiry and transaction ordering
-There are cases where an Email from the user should be considered "outdated".
+#### Email expiration and transaction ordering
+There are cases where an email from the user should be considered "outdated".
 
-- For example, a user sends an email to Relayer A, but their server is "down" at that moment and the user doesn't get a response. The user sends the same email to Relayer B which executes the transaction. Relayer A comes back online later and processes the email, ending up executing the "same" transaction twice.
+- For example, a user sends an email to Relayer A, but their server is "down" at that moment, and the user doesn't get a response. The user sends the same email to Relayer B which executes the transaction. Relayer A comes back online later and processes the email, ending up executing the "same" transaction twice.
 
 - Relayer executes multiple emails from the same user in a different order, either by mistake (maybe due to race conditions when processing emails in parallel) or maliciously.
 
@@ -149,15 +149,15 @@ However, **not all email providers include the timestamp** in the DKIM signature
 
 We want users to be able to send money to an email address that doesn't already have an email wallet.
 
-For this, we introduce something called **Unclaimed Funds**. When a user sends tokens to an email address they are transferred to the core contract and an UnclaimedFund is created for this token. `UnclaimedFunds` contains a commitment to the recipient's email address (`hash(recipientAddr, rand)`). 
+For this, we introduce something called **Unclaimed Funds**. When a user sends tokens to an email address, they are transferred to the core contract, and an UnclaimedFund is created for this token. `UnclaimedFunds` contains a commitment to the recipient's email address (`hash(recipientAddr, rand)`). 
 
 Once the recipient creates an account, their relayer can claim the unclaimed funds by providing proof that the recipient's `AccountKeyCommitment` and UnclaimedFund's `EmailCommitment` are from the same email address.
 
-`UnclaimedFunds` have an expiry of 30 days. So in case the recipient does not create an account within 30 days, the sender can claim the funds back (which is automatically done by relayer).
+`UnclaimedFunds` have an expiration time of 30 days. So in case the recipient does not create an account within 30 days, the sender can claim the funds back (which is automatically done by relayer).
 
 An EmailOp can have either an ETH recipient address or a commitment to the recipient's email address.
 
-`UnclaimedFunds` can also be registered externally. This allows non-email-wallet users to send money to an email by registering an unclaimed fund, and then sharing the `EmailCommitment` randomness with the recipient's (or any) Relayer.
+`UnclaimedFunds` can also be registered externally. This allows non-email-wallet users to send money to an email by registering an unclaimed fund and then sharing the `EmailCommitment` randomness with the recipient's (or any) Relayer.
 
 Related code: [Claim circuit](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/claim.circom), [UnclaimsHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/UnclaimsHandler.sol).
 
@@ -167,9 +167,9 @@ As mentioned above, extensions allow emails to be used for interacting with any 
 
 Various "matchers" like `{string}`, `{recipient}`, `{uint}` are available for extension developers to define subject templates. Relayer will construct the `EmailOp` (and Core contract validate) by selecting a template (from installed extensions of the user) that matches the email subject.
 
-To prevent misuse, extensions can only `execute` on the user's account contract when the target contract is non-ERC20. If extensions need to manage user funds, they should call [special method](https://github.com/zkemail/email-wallet/blob/main/packages/contracts/src/EmailWalletCore.sol#L306) on the Core contract instead, which validates the requested token and the amount is allowed as per the email subject.
+To prevent misuse, extensions can only `execute` on the user's account contract when the target contract is non-ERC20. If extensions need to manage user funds, they should call a [special method](https://github.com/zkemail/email-wallet/blob/main/packages/contracts/src/EmailWalletCore.sol#L306) on the Core contract instead, which validates the requested token and amount is allowed as per the email subject.
 
-We also have a concept of `UnclaimedState` similar to `UnclaimedFund` above, where extensions can use it to store custom "state" for email wallet users. This can be used to build NFT extension (for example) where `tokenAddr + tokenId` is stored in the `UnclaimedState`.
+We also have a concept of `UnclaimedState` similar to `UnclaimedFund` above, where extensions can use it to store custom "state" for email wallet users. This can be used to build an NFT extension (for example) where `tokenAddr + tokenId` is stored in the `UnclaimedState`.
 
 Related code: [UnclaimsHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/ExtensionHandler.sol) and [AccountHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/AccountHandler.sol#L163).
 
@@ -179,7 +179,7 @@ Since users need to send emails to Relayer to operate their wallet, the Relayer 
 
 To overcome this, we have a permission-less relayer network where **anyone can run a relayer and users can use any relayer they want**.
 
-When the user wants to use a new relayer, they forward their original account creation email to the new relayer. Since this email contains the user's account key, the new relayer can "transport" their account using the proof of email from the user containing the account key. This way users can use any relayer by maintaining the same wallet address.
+When the user wants to use a new relayer, they forward their original account creation email to the new relayer. Since this email contains the user's account key, the new relayer can "transport" their account using the proof of email from the user containing the account key. This way, users can use any relayer by maintaining the same wallet address.
 
 Related code: [AccountTransport circuit](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/account_transport.circom) and [RelayerHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/RelayerHandler.sol).
 
@@ -189,7 +189,7 @@ As there are multiple relayers and users could be "registered" with different re
 
 i.e. when a user sends money to an email address, an UnclaimedFund is created for them. However, since the sender's relayer doesn't have an account for the recipient, they cannot claim the UnclaimedFund to the recipient's account.
 
-To solve this, we have a **relayer communication protocol using PSI** (Private Set Intersection). Relayers commit a PSI point for each account on-chain when creating an account. Relayers communicate using API to check if they have an account for a particular email address without revealing the email address (using PSI).
+To solve this, we have a **relayer communication protocol using PSI** (Private Set Intersection). Relayers commit a PSI point for each account on-chain when creating an account. Relayers communicate using an API to check if they have an account for a particular email address without revealing the email address (using PSI).
 
 If the sender's Relayer finds another relayer who has an account for the recipient (by verifying the returned PSI point on-chain), they send the randomness used in `EmailCommitment` of UnclaimedFund to the recipient's relayer. The recipient's relayer can then use this to generate proof and claim the funds to the recipient's account.
 
@@ -205,7 +205,7 @@ Relayers can set `feeToken` and `feePerGas` values in the EmailOp (below the max
 
 Relayers **profit from the difference between `feePerGas` in the EmailOp and the actual market gas fee**.
 
-Core contract is designed to do fee reimbursement even if an EmailOp execution fails (for example due to some error in an extension). But if a transaction fails in the validation phase, the relayer is not reimbursed. To prevent this, Relayer should dry-run a transaction before executing it on-chain. A transaction passing locally is expected to pass on-chain.
+Core contract is designed to do fee reimbursement even if an EmailOp execution fails (for example, due to some error in an extension). But if a transaction fails in the validation phase, the relayer is not reimbursed. To prevent this, Relayer should dry-run a transaction before executing it on-chain. A transaction passing locally is expected to pass on-chain.
 
 Relayer pays the fee for creating/initializing new accounts though. To prevent DOS attacks, Relayers can have necessary checks - for example, create accounts only for users who have registered an UnclaimedFund with a minimum amount.
 
@@ -214,7 +214,7 @@ Relevant code [handleEmailOp in EmailWalletCore](https://github.com/zkemail/emai
 
 #### On-chain DKIM Registry
 
-Proof verification involves verifying the DKIM public key used when generating the proof is the same as the one stored on-chain before (in a DKIM Registry). This adds a trust assumption on the DKIM Registry and people(s) who have control over updating public keys for a domain.
+Proof verification involves verifying that the DKIM public key used when generating the proof is the same as the one stored on-chain before (in a DKIM Registry). This adds a trust assumption on the DKIM Registry and persons(s) who have control over updating public keys for a domain.
 
 As a solution, we allow Email Wallet users to **use a custom DKIM Registry** to verify their emails.
 
@@ -230,7 +230,7 @@ Account Abstraction EIP-4337 was considered for Email Wallet. However, it is not
 
 Email Wallet requires a Relayer to listen to emails from the user (IMAP) and generate the proof of email. This is not something a 4337 bundler can do.
 
-A design where Relayer generates the proof and calls the 4337 Bundler with `UserOp` can be done (with [some hacks](https://saleel.xyz/blog/zk-account-abstraction/) to overcome 4337 storage restrictions), but this doesn't offer a lot of advantages. *One advantage would be ensuring simulated transactions also pass during execution - though chances of this happening otherwise are also very low.*
+A design where Relayer generates the proof and calls the 4337 Bundler with `UserOp` can be done (with [some hacks](https://saleel.xyz/blog/zk-account-abstraction/) to overcome 4337 storage restrictions), but this doesn't offer a lot of advantages. *One advantage would be ensuring simulated transactions also pass during execution, though chances of this happening otherwise are also very low.*
 
 Nonetheless, a 4337 account for Email Wallet can be explored in the future if the ecosystem offers a lot of value.
 
@@ -240,7 +240,7 @@ Many of the above restrictions are to force the Relayer to be honest and censors
 
 For this, a 4337 wallet could be explored, where the user's browser calls 4337 Bundler with proof of email as the `UserOp` signature. The account key can be a PIN code entered by the user and stored in the browser.
 
-However, a client-side proving will require the user to copy the whole email content and paste it to a web app. **This is a bad UX** considering sending money is a frequent use-case and demands a simple UX that also works from mobile.
+However, client-side proving will require the user to copy the whole email content and paste it into a web app. **This is a bad UX** considering sending money is a frequent use-case and demands a simple UX that also works from mobile.
 
 On the other hand, **users could self-host Relayer on their own computer** to avoid trusting a third party.
 
@@ -250,7 +250,7 @@ On the other hand, **users could self-host Relayer on their own computer** to av
 
 Email Wallet has the potential to onboard many new users to Ethereum. Users can interact with Ethereum without knowing anything about wallets, private keys, gas, etc.
 
-Email Wallet is **a gateway to Ethereum**, and not just a simple way for sending money. Developers can build extensions to allow users to interact with their smart contracts by sending emails. This can be used to build many interesting applications apart from Defi.
+Email Wallet is **a gateway to Ethereum**, and not just a simple way to send money. Developers can build extensions to allow users to interact with their smart contracts by sending emails. This can be used to build many interesting applications, apart from interactions with Defi contracts.
 
 For example, Email Wallet could be used as **a recovery solution for other contract wallets**. Or email could be used as one of the keys for a multi-sig. (We and other teams are exploring more on this.)
 
