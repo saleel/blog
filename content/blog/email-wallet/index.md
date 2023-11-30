@@ -109,8 +109,7 @@ Core contract ensures EmailPointer and AccountKeyCommitment are unique.
 
 *We can remove `EmailPointer` by having the circuit check for the Account Key using a specific prefix that is less likely to be found in "other" emails. The `CODE` prefix does this already and `EmailPointer` can be removed in future versions of Email Wallet.*
 
-Related circuits: [AccountCreation](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/account_creation.circom) and [AccountInitialization](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/account_init.circom).
-Related contract: [AccountHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/AccountHandler.sol)
+Related code: [AccountCreation circuit](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/account_creation.circom), [AccountInitialization circuit](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/account_init.circom) and [AccountHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/AccountHandler.sol).
 
 #### Subject validation
 Extracting the parameters from an email subject is difficult to do on-chain. 
@@ -121,8 +120,7 @@ Note that, verifying the proof of email (which happens in `handleEmailOp`) ensur
 
 For privacy reasons, the email address (of the recipient) is masked and is replaced with 0 bits when it is output from the circuit.
 
-Related circuit: [EmailSender](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/email_sender.circom).
-Related contract: [SubjectUtils.sol](
+Related code: [EmailSender circuit](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/email_sender.circom) and [SubjectUtils.sol contract](
 https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/libraries/SubjectUtils.sol)
 
 #### Email Nullifier
@@ -130,7 +128,7 @@ To prevent Relayer from creating multiple transactions from the same email addre
 
 Currently nullifier is generated in the circuit using `hash(emailSignature)`. The core **contract maintains used nullifiers**, and thus ensures each email is used only once.
 
-Related circuit: [EmailSender](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/email_sender.circom#L118)
+Related code: [EmailSender circuit](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/email_sender.circom#L118)
 
 #### Email expiry and transaction ordering
 There are cases where an Email from the user should be considered "outdated".
@@ -161,8 +159,7 @@ An EmailOp can have either an ETH recipient address or a commitment to the recip
 
 `UnclaimedFunds` can also be registered externally. This allows non-email-wallet users to send money to an email by registering an unclaimed fund, and then sharing the `EmailCommitment` randomness with the recipient's (or any) Relayer.
 
-Related circuit: [Claim](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/claim.circom)
-Related contract: [UnclaimsHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/UnclaimsHandler.sol)
+Related code: [Claim circuit](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/claim.circom), [UnclaimsHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/UnclaimsHandler.sol).
 
 #### Extensions
 
@@ -174,7 +171,7 @@ To prevent misuse, extensions can only `execute` on the user's account contract 
 
 We also have a concept of `UnclaimedState` similar to `UnclaimedFund` above, where extensions can use it to store custom "state" for email wallet users. This can be used to build NFT extension (for example) where `tokenAddr + tokenId` is stored in the `UnclaimedState`.
 
-Related contract: [UnclaimsHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/ExtensionHandler.sol) and [AccountHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/AccountHandler.sol#L163)
+Related code: [UnclaimsHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/ExtensionHandler.sol) and [AccountHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/AccountHandler.sol#L163).
 
 
 #### Relayer Censorship
@@ -184,8 +181,7 @@ To overcome this, we have a permission-less relayer network where **anyone can r
 
 When the user wants to use a new relayer, they forward their original account creation email to the new relayer. Since this email contains the user's account key, the new relayer can "transport" their account using the proof of email from the user containing the account key. This way users can use any relayer by maintaining the same wallet address.
 
-Related circuit: [AccountTransport](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/account_transport.circom)
-Related contract: [RelayerHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/RelayerHandler.sol)
+Related code: [AccountTransport circuit](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/account_transport.circom) and [RelayerHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/RelayerHandler.sol).
 
 
 #### Relayer Communication
@@ -199,7 +195,8 @@ If the sender's Relayer finds another relayer who has an account for the recipie
 
 If the sender's Relayer cannot find any matching PSI points from any other relayer, they invite the recipient to create an account with them.
 
-Related circuits: [AccountCreation](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/account_creation.circom#L28)
+Related code: [AccountCreation circuit](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/circuits/src/account_creation.circom#L28).
+
 
 #### Relayer Incentives
 Relayers pay the gas for creating the account and executing EmailOps. To incentivize the Relayer to do this, we have a fee reimbursement mechanism.
@@ -212,7 +209,7 @@ Core contract is designed to do fee reimbursement even if an EmailOp execution f
 
 Relayer pays the fee for creating/initializing new accounts though. To prevent DOS attacks, Relayers can have necessary checks - for example, create accounts only for users who have registered an UnclaimedFund with a minimum amount.
 
-Relevant contract code [here](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/EmailWalletCore.sol#L246-L281).
+Relevant code [handleEmailOp in EmailWalletCore](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/EmailWalletCore.sol#L246-L281).
 
 
 #### On-chain DKIM Registry
@@ -225,7 +222,7 @@ Users can deploy their own DKIM registry and set the public keys for their email
 
 We use the hash of `DKIMPublicKey` as the circuit output (and in the registry) instead of the public key directly to save on gas costs (as the public key is large).
 
-Relevant contract code [here](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/AccountHandler.sol#L232-L260).
+Relevant code [AccountHandler.sol](https://github.com/zkemail/email-wallet/blob/d56dad165f935006697b7849f6c54250c8eb3147/packages/contracts/src/handlers/AccountHandler.sol#L232-L260).
 
 
 #### EIP-4337
