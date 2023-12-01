@@ -331,8 +331,13 @@ a:focus {
   }
 }
 
+.blog-post pre[class*="language-"] {
+  background-color: #f2f4f0 !important;
+  border-radius: 3px !important;
+}
+
 .blog-post code {
-  background-color: #E8E9E6 !important;
+  background-color: #f2f4f0 !important;
   color: #E43F46 !important;
   padding: 0.1rem 0.3rem !important;
   letter-spacing: 0.5px !important;

@@ -52,7 +52,6 @@ Users can use the `execute()` function to **make calls to any external contract 
 
 
 ```solidity
-
 contract SemaphoreAccount {
     IEntryPoint private immutable _entryPoint;
     Semaphore public semaphore;   // Semaphore contract
