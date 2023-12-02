@@ -50,7 +50,6 @@ Below is a base version of the smart contract we are going to build. There is a 
 
 Users can use the `execute()` function to **make calls to any external contract with any calldata**, essentially making the account contract work like an EOA. The user will need to encode call to `execute()` function along with the arguments as the `calldata` of the `UserOperation`.
 
-
 ```solidity
 contract SemaphoreAccount {
     IEntryPoint private immutable _entryPoint;
@@ -104,7 +103,12 @@ contract SemaphoreAccount {
 
 ```
 
-You might think that `_validateUserOp` can **simply call the Semaphore contract to validate the decoded proof**. However, this is **not very straight-forward** due to storage limitations in the EIP 4337.
+We are using the **`userOpHash` as the signal** when generating Semaphore proof. This will ensure no one can construct a different UserOp (with a malicious `calldata`) using the same proof. i.e. **when using a ZK proof as the signature for a transaction, the hash of that transaction should be part of the circuit/proof**. Otherwise, you are signing "any" transaction and not a specific one.
+
+We don't need to use `externalNullifier` as there is no need to prevent "double signaling". Even if the user creates multiple proofs for the same `UserOp`, only one of them can be executed as there is `nonce` in `UserOp` which is validated in the 4337 `EntryPoint` contract.
+
+
+Now, you might think that `_validateUserOp` can **simply call the Semaphore contract to validate the decoded proof**. However, this is **not very straight forward** due to storage limitations in the EIP 4337.
 
 
 ### Storage Limitations of EIP 4337
@@ -182,7 +186,7 @@ The downside here is that we would need to deploy a new Semaphore contract that 
 
 In this solution, we are **storing the `merkleRoot` of the group in the wallet contract** itself. Since the value is stored in its own storage, `validateUserOp()` can use it for proof verification.
 
-During the execution, we will **check if the stored value is still valid by calling the Semaphore contract** (note that execution function are free to access external storage). If not, **we will update the stored value and revert the current execution**.
+During the execution, we will **check if the stored value is still valid by calling the Semaphore contract** (note that execution functions are free to access external storage). If not, **we will update the stored value and revert the current execution**.
 
 This approach is ideal for groups that seldom change (i.e. new members are added or removed rarely). **The one transaction immediately after the group update will fail**, and there should be an appropriate mechanism to handle this - like the contract emitting a failure event and the client listening to this creating a new UserOp with an updated signature.
 
@@ -217,7 +221,7 @@ contract SemaphoreAccount {
 
 ### Other challenges
 
-These are some issues that are specific to the Semaphore use case.
+These are some issues that are specific to the Semaphore use case if you are seriously considering building a 4337 Semaphore account.
 
 - The Pairing library used in Semaphore proof verification uses `gas()` method (when making static calls to precompiles for elliptic curve operations) - [like this](https://github.com/semaphore-protocol/semaphore/blob/main/packages/contracts/contracts/base/Pairing.sol#L108).
 
@@ -233,7 +237,7 @@ In my copy, I have moved them to be inside the `verifyProof()` function. I have 
 
 Semaphore protocol allows proof verification using previous merkleRoots up to a time limit, which is implemented in `verifyProof()` method. So we would need to reimplement all of these if calling Verifier directly.
 
-I have created [an issue](https://github.com/semaphore-protocol/semaphore/issues/366) in Semaphore protocol to add a pure verification method.
+I have created [an issue](https://github.com/semaphore-protocol/semaphore/issues/366) in the Semaphore repo to add a pure verification method.
 
 ## Conclusion
 
