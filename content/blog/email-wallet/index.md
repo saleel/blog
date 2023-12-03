@@ -4,7 +4,7 @@ date: "2023-11-30"
 description: "Exploring Email Wallet and diving into some of the design challenges."
 ---
 
-*Special thanks to Aayush for the review and suggestions.*
+*Special thanks to Aayush and Sora for the review and suggestions.*
 
 ### Introduction
 
