@@ -252,7 +252,7 @@ Email Wallet has the potential to onboard many new users to Ethereum. Users can 
 
 Email Wallet is **a gateway to Ethereum**, and not just a simple way to send money. Developers can build extensions to allow users to interact with their smart contracts by sending emails. This can be used to build many interesting applications, apart from interactions with Defi contracts.
 
-For example, Email Wallet could be used as **a recovery solution for other contract wallets**. Or email could be used as one of the keys for a multi-sig. (We and other teams are exploring more on this.)
+For example, Email Wallet could be used as **a recovery solution for other contract wallets**. Or email could be used as one of the keys for a multisig. (We are exploring more on this with other teams.)
 
 **You can learn more about Email Wallet circuits [here](https://github.com/zkemail/email-wallet/tree/main/packages/circuits), and the contracts [here](https://github.com/zkemail/email-wallet/tree/main/packages/contracts).**
 
