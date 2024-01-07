@@ -13,18 +13,23 @@ const Layout = ({ location, title, children }) => {
           <Link to="/">{title}</Link>
         </h1>
         <div>
-          <span>Software Engineer - Ethereum Foundation (PSE)</span>
-          <span>&nbsp; | &nbsp;</span>
+          <div style={{ margin: '10px 0' }}>Software Engineer at <a target="_blank" rel="nofollow noreferrer" href="https://pse.dev/">PSE</a> (Ethereum Foundation)</div>
           <span>
-            <strong>Github</strong>: <a target="_blank" rel="nofollow noreferrer" href="https://github.com/saleel">@saleel</a>
+            <strong>Github</strong>: <a target="_blank" rel="nofollow noreferrer" href="https://github.com/saleel">saleel</a>
+          </span>
+          <span>&nbsp; | &nbsp;</span>
+          
+          <span>
+            <strong>Farcaster</strong>: <a target="_blank" rel="nofollow noreferrer" href="https://warpcast.com/saleel">saleel</a>
+          </span>
+          <span>&nbsp; | &nbsp;</span>
+          
+          <span>
+            <strong>Twitter</strong>: <a target="_blank" rel="nofollow noreferrer" href="https://twitter.com/_saleel">_saleel</a>
           </span>
           <span>&nbsp; | &nbsp;</span>
           <span>
-            <strong>Twitter</strong>: <a target="_blank" rel="nofollow noreferrer" href="https://twitter.com/_saleel">@_saleel</a>
-          </span>
-          <span>&nbsp; | &nbsp;</span>
-          <span>
-            <strong>Telegram</strong>: <code>saleelp</code>
+            <strong>Telegram</strong>: <a target="_blank" rel="nofollow noreferrer" href="https://tttttt.me/saleelp">saleelp</a>
           </span>
         </div>
         <hr />
