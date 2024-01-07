@@ -1,7 +1,7 @@
 ---
-title: ZK + Account Abstraction - Experimenting with EIP 4337 and Semaphore
+title: ZK + Account Abstraction
 date: "2023-10-02"
-description: "Experiment on building EIP-4337 smart contract wallet controllable by any member in a Semaphore group."
+description: "Experiment on building EIP-4337 smart account using ZK proofs and tips to overcome 4337 storage access restrictions."
 ---
 
 <i>Special thanks to Yoav Weiss for suggesting the optimistic validation solution and other tips.</i>
@@ -19,15 +19,15 @@ description: "Experiment on building EIP-4337 smart contract wallet controllable
 
 ## Introduction
 
-In this post, I am sharing an experiment I did on building [EIP 4337](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-4337.md)-compliant smart contract wallet that could be controlled by zero-knowledge proofs.
+In this post, I am sharing an experiment I did on building [EIP 4337](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-4337.md)-compliant smart account that could be controlled by zero-knowledge proofs.
 
 Specifically, I was building **a wallet that could be controlled by anyone in a [Semaphore](https://semaphore.pse.dev/) group** - by proving their membership in the group.
 
-But the problems and solutions discussed below might also be helpful for others building on 4337.
+We also look into storage access restrictions in 4337 and solutions to overcome this, which might also be helpful for others building on 4337 (even when not using ZK proof as the signature).
 
 
 #### EIP 4337
-  - EIP 4337 is essentially a standard for smart contract wallets. 
+  - EIP 4337 is essentially a standard for smart account. 
   - One of the goals is to **decentralize the relayers** who take "operations" from users and create blockchain transactions that operate on the wallet contract. They are called bundlers in 4337, as they bundle many "operations" in one transaction.
   - **`UserOperation`** is the equivalent of an Ethereum transaction in the 4337 world. It contains the `calldata` to be executed on the wallet contract along with a `signature`.
   - Wallet contract need to implement a function `validateUserOp` that verifies whether a given `UserOperation` is valid or not, **mostly using the `signature` param**.
@@ -42,7 +42,7 @@ But the problems and solutions discussed below might also be helpful for others 
   - Semaphore contract stores the merkle root of all groups. Group members produce a **ZK proof of merkle inclusion** (using their private key) to prove their membership and cast signals.
 - The protocol also has a mechanism to prevent double signaling (under the same topic known "externalNullifier"). Read more [here](https://semaphore.pse.dev/docs/introduction)
 
-## Building the Smart Contract Wallet
+## Building the Smart Contract
 
 One obvious thing here would be to **pass the Semaphore proof as the `signature` of the `UserOperation`**. We can then decode the proof from the signature, and verify it against the latest `merkleRoot` of the group stored in the Semaphore contract.
 
